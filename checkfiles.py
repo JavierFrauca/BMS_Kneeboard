@@ -5,7 +5,13 @@ import time
 
 # Hash del fichero inicial
 hash_inicial = None
-
+def detect_encoding(file_path):
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            f.read()
+        return 'UTF-8'
+    except UnicodeDecodeError:
+        return 'ANSI'
 # Función para procesar el fichero y convertirlo en HTML
 def procesar_fichero(ruta_fichero):
     # Variable para almacenar las líneas del archivo
@@ -19,7 +25,10 @@ def procesar_fichero(ruta_fichero):
     with open(ruta_fichero, 'rb') as file:
         contenido_bytes = file.read()
         # Decodifica los bytes a texto utilizando UTF-8
-        contenido_texto = contenido_bytes.decode('utf-8')
+        if detect_encoding(ruta_fichero) == 'UTF-8':
+            contenido_texto = contenido_bytes.decode('utf-8')
+        else:
+            contenido_texto = contenido_bytes.decode('ansi')
         for linea in contenido_texto.splitlines():
             # Agregar la línea al contenido
             if len(linea.strip()) == 0:
@@ -94,7 +103,9 @@ def procesar_fichero(ruta_fichero):
     fichero_html = os.path.splitext(ruta_fichero)[0] + '.html'
 
     # Incluye la cabecera y el pie html
-    contenido_html = '<html><head><style>body {font-family: "Courier New", monospace;} table {width: 100%;border-collapse: collapse;border: 1px solid black;padding: 0;margin: 0;} th {background-color: black;color: white;} td, th {border: 1px solid black;padding: 0;margin: 0;}.container {height: 100vh; display: flex;} .div1 {width: 200px;background-color: #f1f1f1;overflow: hidden;} .div2 {flex-grow: 1;background-color: #ccc;overflow-y: scroll;} .div1 div {min-height: 50px;display: flex;align-items: center;justify-content: left;} .div1 a{text-decoration: none;font-weight: bold;}</style></head><body>' + '\n'
+    contenido_html = '<html><head>'
+    contenido_html +='<style>body {font-family: "Courier New", monospace;} table {width: 100%;border-collapse: collapse;border: 1px solid black;padding: 0;margin: 0;} th {background-color: black;color: white;} td, th {border: 1px solid black;padding: 0;margin: 0;}.container {height: 100vh; display: flex;} .div1 {width: 200px;background-color: #f1f1f1;overflow: hidden;} .div2 {flex-grow: 1;background-color: #ccc;overflow-y: scroll;} .div1 div {min-height: 50px;display: flex;align-items: center;justify-content: left;} .div1 a{text-decoration: none;font-weight: bold;}</style>'
+    contenido_html+='</head><body>' + '\n'
     contenido_html += '<div class="container"><div class="div1">' + '\n'
     contenido_html += indice + '\n'
     contenido_html += '</div>' + '\n'
@@ -105,7 +116,7 @@ def procesar_fichero(ruta_fichero):
     contenido_html += "</body></html>"
 
     # Guarda el contenido HTML en un fichero
-    with open(fichero_html, 'w') as file:
+    with open(fichero_html, 'w',encoding='utf-8') as file:
         file.write(contenido_html)
 
 # Función para verificar si el fichero ha cambiado
